@@ -52,3 +52,5 @@ target
 .DS_Store
 
 *.tempKey
+.java-version
+.vscode/settings.json

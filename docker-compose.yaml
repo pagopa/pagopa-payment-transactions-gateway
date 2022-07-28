@@ -1,0 +1,55 @@
+version: "3.9"
+
+services:
+ 
+  pagopa-payment-transactions-gateway:
+    container_name: pagopa-payment-transactions-gateway
+    env_file: .env.local
+    build:
+      context: .
+    ports:
+        - "8085:8080"
+    networks:
+      - payment-gateway-net
+      - pagopa-ecommerce-net
+
+  postgres:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    networks:
+      - payment-gateway-net
+    
+  postgres-liquibase:
+    container_name: postgres-liquibase
+    image: liquibase/liquibase
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}  
+    command:
+      - --classpath=/liquibase/changelog
+      - --url=jdbc:postgresql://postgres:5432/${POSTGRES_DB}?user=${POSTGRES_USER}&password=${POSTGRES_PASSWORD}
+      - --changeLogFile=changelog.xml
+      - --contexts=default,legacy,not_legacy
+      - update
+      - -Dschema=public
+    volumes:
+      - ./.db/postgres/changes/changelog.xml:/liquibase/changelog.xml
+
+    networks:
+      - payment-gateway-net
+
+networks:
+  payment-gateway-net:
+    name: payment-gateway-net
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1450
+
+  pagopa-ecommerce-net:
+    name: pagopa-ecommerce-net

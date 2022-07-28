@@ -19,7 +19,7 @@ public class PaymentRequestEntity {
     @Column(name = "GUID", nullable = false)
     private String guid;
 
-    @Column(name = "RESOURCE_PATH", nullable = false)
+    @Column(name = "RESOURCE_PATH")
     private String resourcePath;
 
     @Column(name = "CORRELATION_ID")
